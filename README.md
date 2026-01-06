@@ -18,7 +18,14 @@ Add to your `pubspec.yaml`:
 ```yaml
 dependencies:
   game_webview_sdk:
-    path: ../game_webview_sdk  # or publish to pub.dev
+    git:
+      url: https://github.com/justbriang/flutter-game-webview-sdk.git
+      ref: v1.0.0  # or 'main' for latest
+```
+
+Then run:
+```bash
+flutter pub get
 ```
 
 ## Quick Start
