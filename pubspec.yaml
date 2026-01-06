@@ -1,0 +1,20 @@
+name: game_webview_sdk
+description: A Flutter SDK for embedding games that use the postMessage protocol. Provides WebView integration with session management and event callbacks.
+version: 1.0.0
+homepage: https://github.com/your-org/game_webview_sdk
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+  flutter: '>=3.10.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  webview_flutter: ^4.4.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^3.0.0
+
+flutter:
