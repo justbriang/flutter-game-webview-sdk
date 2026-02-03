@@ -1,53 +1,16 @@
-/// JavaScript code injected into the WebView to bridge postMessage communication.
+/// Utilities for JavaScript channel communication between Flutter and game.
+///
+/// The game calls window.GameBridge.postMessage() directly to send messages to Flutter.
+/// Flutter uses evaluateJavascript with window.postMessage() to send messages to the game.
 class JsBridge {
   /// The name of the JavaScript channel used for communication
   static const String channelName = 'GameBridge';
-
-  /// JavaScript code to inject after the page loads.
-  ///
-  /// This code:
-  /// 1. Intercepts postMessage events from the game
-  /// 2. Forwards them to Flutter via the GameBridge channel
-  /// 3. Provides a function to send messages back to the game
-  static const String bridgeScript = '''
-(function() {
-  // Prevent double initialization
-  if (window._gameBridgeInitialized) return;
-  window._gameBridgeInitialized = true;
-
-  // Listen for messages from the game (sent to parent)
-  window.addEventListener('message', function(event) {
-    // Only handle messages with our expected structure
-    if (event.data && typeof event.data === 'object' && event.data.type) {
-      try {
-        // Forward to Flutter
-        $channelName.postMessage(JSON.stringify(event.data));
-      } catch (e) {
-        console.error('GameBridge: Failed to forward message', e);
-      }
-    }
-  });
-
-  // Function for Flutter to send messages to the game
-  // The game listens on window for these messages
-  window.sendToGame = function(messageJson) {
-    try {
-      var message = JSON.parse(messageJson);
-      window.postMessage(message, '*');
-    } catch (e) {
-      console.error('GameBridge: Failed to send message to game', e);
-    }
-  };
-
-  console.log('GameBridge: Initialized');
-})();
-''';
 
   /// Generates JavaScript to send a message to the game
   static String sendMessageScript(String type, Map<String, dynamic> payload) {
     final payloadJson = _encodeJson(payload);
     return '''
-window.sendToGame('{"type":"$type","payload":$payloadJson}');
+window.postMessage({"type":"$type","payload":$payloadJson}, '*');
 ''';
   }
 

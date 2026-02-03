@@ -142,7 +142,6 @@ class GameWebView extends StatefulWidget {
 class _GameWebViewState extends State<GameWebView> {
   late final WebViewController _webViewController;
   bool _isLoading = true;
-  bool _bridgeInjected = false;
 
   @override
   void initState() {
@@ -161,14 +160,11 @@ class _GameWebViewState extends State<GameWebView> {
       ..setNavigationDelegate(
         NavigationDelegate(
           onPageStarted: (_) {
-            _bridgeInjected = false;
             setState(() => _isLoading = true);
             widget.controller?.setLoading(true);
             widget.onLoadStart?.call();
           },
-          onPageFinished: (_) async {
-            // Inject the bridge script
-            await _injectBridge();
+          onPageFinished: (_) {
             setState(() => _isLoading = false);
             widget.controller?.setLoading(false);
             widget.onLoadFinished?.call();
@@ -209,12 +205,6 @@ class _GameWebViewState extends State<GameWebView> {
     queryParams['authToken'] = widget.session!.authToken;
 
     return baseUri.replace(queryParameters: queryParams).toString();
-  }
-
-  Future<void> _injectBridge() async {
-    if (_bridgeInjected) return;
-    _bridgeInjected = true;
-    await _webViewController.runJavaScript(JsBridge.bridgeScript);
   }
 
   void _handleGameMessage(JavaScriptMessage message) {

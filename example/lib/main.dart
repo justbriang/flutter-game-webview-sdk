@@ -137,7 +137,7 @@ class _SessionGamePageState extends State<SessionGamePage> {
           // Game
           Expanded(
             child: GameWebView(
-              gameUrl: 'https://tribeblast.postdit.co',
+              gameUrl: 'https://tribeblast.postdit.co?v=${DateTime.now().millisecondsSinceEpoch}',
               controller: _controller,
               session: SessionConfig(
                 // In a real app, get these from your backend
@@ -148,20 +148,26 @@ class _SessionGamePageState extends State<SessionGamePage> {
               ),
               onSessionStart: (sessionId, authToken) async {
                 // In a real app, validate with your backend here
-                debugPrint('Session start: $sessionId');
+                debugPrint('📨 [SESSION_START] sessionId: $sessionId, authToken: $authToken');
+                debugPrint('   → Validating with backend...');
                 // Simulate backend validation
                 await Future.delayed(const Duration(milliseconds: 100));
+                debugPrint('   ✅ Session validated, confirming...');
                 return true; // Confirm session
               },
               onGameStart: (sessionId) {
-                debugPrint('Game started: $sessionId');
+                debugPrint('🎮 [GAME_START] sessionId: $sessionId');
+                debugPrint('   → Player has started playing');
               },
               onScoreUpdate: (update) {
+                debugPrint('📊 [SCORE_UPDATE] score: ${update.score}, sessionId: ${update.sessionId}');
                 setState(() {
                   _currentScore = update.score;
                 });
               },
               onNewHighScore: (update) {
+                debugPrint('🏆 [NEW_HIGH_SCORE] score: ${update.score}, sessionId: ${update.sessionId}');
+                debugPrint('   → This would be saved to backend as new high score');
                 setState(() {
                   _highScore = update.score;
                 });
@@ -173,9 +179,22 @@ class _SessionGamePageState extends State<SessionGamePage> {
                 );
               },
               onGameOver: (finalScore, stats, sessionId) async {
-                debugPrint('Game over! Score: $finalScore');
-                debugPrint('Stats: ${stats.toString()}');
-                debugPrint('Duration: ${stats.playDurationAsDuration.inSeconds}s');
+                debugPrint('🎯 [GAME_OVER] sessionId: $sessionId');
+                debugPrint('   finalScore: $finalScore');
+                debugPrint('   totalPiecesPlaced: ${stats.totalPiecesPlaced}');
+                debugPrint('   totalLinesCleared: ${stats.totalLinesCleared}');
+                debugPrint('   playDuration: ${stats.playDurationAsDuration.inSeconds}s');
+                debugPrint('   → This would be sent to backend API:');
+                debugPrint('   POST /api/game/result');
+                debugPrint('   {');
+                debugPrint('     "sessionId": "$sessionId",');
+                debugPrint('     "finalScore": $finalScore,');
+                debugPrint('     "stats": {');
+                debugPrint('       "totalPiecesPlaced": ${stats.totalPiecesPlaced},');
+                debugPrint('       "totalLinesCleared": ${stats.totalLinesCleared},');
+                debugPrint('       "playDuration": ${stats.playDuration}');
+                debugPrint('     }');
+                debugPrint('   }');
 
                 // In a real app, save to your backend
                 // await myApi.saveScore(sessionId, finalScore, stats);
@@ -185,7 +204,9 @@ class _SessionGamePageState extends State<SessionGamePage> {
                 }
               },
               onGameTerminated: (finalScore, stats, sessionId, reason) async {
-                debugPrint('Game terminated: $reason, Score: $finalScore');
+                debugPrint('⚠️  [GAME_TERMINATED] sessionId: $sessionId, reason: $reason');
+                debugPrint('   finalScore: $finalScore');
+                debugPrint('   → Saving partial progress to backend...');
                 // Save partial progress to backend
               },
               loadingWidget: const Center(
