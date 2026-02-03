@@ -10,7 +10,9 @@ dependencies:
   flutter:
     sdk: flutter
   game_webview_sdk:
-    path: ../
+    git:
+      url: https://github.com/justbriang/flutter-game-webview-sdk.git
+      ref: main
 
 dev_dependencies:
   flutter_test:
