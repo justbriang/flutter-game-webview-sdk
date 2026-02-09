@@ -77,7 +77,7 @@ class StandaloneGamePage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('TribeBlast (Standalone)'),
+        title: const Text('Tribeblast (Standalone)'),
       ),
       body: GameWebView(
         gameUrl: 'https://tribeblast.postdit.co',
@@ -100,7 +100,7 @@ class SessionGamePage extends StatefulWidget {
 class _SessionGamePageState extends State<SessionGamePage> {
   final GameController _controller = GameController();
   int _currentScore = 0;
-  int _highScore = 15000; // Would come from your backend
+  int _highScore = 0;
 
   @override
   void dispose() {
@@ -112,7 +112,7 @@ class _SessionGamePageState extends State<SessionGamePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('TribeBlast'),
+        title: const Text('Merg2048'),
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh),
@@ -137,7 +137,8 @@ class _SessionGamePageState extends State<SessionGamePage> {
           // Game
           Expanded(
             child: GameWebView(
-              gameUrl: 'https://tribeblast.postdit.co?v=${DateTime.now().millisecondsSinceEpoch}',
+              gameUrl:
+                  'https://tribeblast.postdit.co?v=${DateTime.now().millisecondsSinceEpoch}',
               controller: _controller,
               session: SessionConfig(
                 // In a real app, get these from your backend
@@ -147,27 +148,47 @@ class _SessionGamePageState extends State<SessionGamePage> {
                 playerName: 'DemoPlayer',
               ),
               onSessionStart: (sessionId, authToken) async {
-                // In a real app, validate with your backend here
-                debugPrint('📨 [SESSION_START] sessionId: $sessionId, authToken: $authToken');
+                debugPrint(
+                    '📨 [SESSION_START] sessionId: $sessionId, authToken: $authToken');
                 debugPrint('   → Validating with backend...');
-                // Simulate backend validation
+
+                // Simulate backend validation that returns high score
                 await Future.delayed(const Duration(milliseconds: 100));
-                debugPrint('   ✅ Session validated, confirming...');
-                return true; // Confirm session
+                const backendHighScore = 88888; // From your backend
+                const backendPlayerName = 'DemoPlayer'; // From your backend
+                debugPrint(
+                    '   ✅ Session validated, highScore: $backendHighScore');
+
+                // Update Flutter-side state
+                setState(() {
+                  _highScore = backendHighScore;
+                });
+
+                // Confirm manually via controller to set high score in game UI
+                _controller.confirmSession(
+                  sessionId: sessionId,
+                  highScore: backendHighScore,
+                  playerName: backendPlayerName,
+                );
+
+                return null; // null = handled manually via controller
               },
               onGameStart: (sessionId) {
                 debugPrint('🎮 [GAME_START] sessionId: $sessionId');
                 debugPrint('   → Player has started playing');
               },
               onScoreUpdate: (update) {
-                debugPrint('📊 [SCORE_UPDATE] score: ${update.score}, sessionId: ${update.sessionId}');
+                debugPrint(
+                    '📊 [SCORE_UPDATE] score: ${update.score}, sessionId: ${update.sessionId}');
                 setState(() {
                   _currentScore = update.score;
                 });
               },
               onNewHighScore: (update) {
-                debugPrint('🏆 [NEW_HIGH_SCORE] score: ${update.score}, sessionId: ${update.sessionId}');
-                debugPrint('   → This would be saved to backend as new high score');
+                debugPrint(
+                    '🏆 [NEW_HIGH_SCORE] score: ${update.score}, sessionId: ${update.sessionId}');
+                debugPrint(
+                    '   → This would be saved to backend as new high score');
                 setState(() {
                   _highScore = update.score;
                 });
@@ -183,15 +204,18 @@ class _SessionGamePageState extends State<SessionGamePage> {
                 debugPrint('   finalScore: $finalScore');
                 debugPrint('   totalPiecesPlaced: ${stats.totalPiecesPlaced}');
                 debugPrint('   totalLinesCleared: ${stats.totalLinesCleared}');
-                debugPrint('   playDuration: ${stats.playDurationAsDuration.inSeconds}s');
+                debugPrint(
+                    '   playDuration: ${stats.playDurationAsDuration.inSeconds}s');
                 debugPrint('   → This would be sent to backend API:');
                 debugPrint('   POST /api/game/result');
                 debugPrint('   {');
                 debugPrint('     "sessionId": "$sessionId",');
                 debugPrint('     "finalScore": $finalScore,');
                 debugPrint('     "stats": {');
-                debugPrint('       "totalPiecesPlaced": ${stats.totalPiecesPlaced},');
-                debugPrint('       "totalLinesCleared": ${stats.totalLinesCleared},');
+                debugPrint(
+                    '       "totalPiecesPlaced": ${stats.totalPiecesPlaced},');
+                debugPrint(
+                    '       "totalLinesCleared": ${stats.totalLinesCleared},');
                 debugPrint('       "playDuration": ${stats.playDuration}');
                 debugPrint('     }');
                 debugPrint('   }');
@@ -204,7 +228,8 @@ class _SessionGamePageState extends State<SessionGamePage> {
                 }
               },
               onGameTerminated: (finalScore, stats, sessionId, reason) async {
-                debugPrint('⚠️  [GAME_TERMINATED] sessionId: $sessionId, reason: $reason');
+                debugPrint(
+                    '⚠️  [GAME_TERMINATED] sessionId: $sessionId, reason: $reason');
                 debugPrint('   finalScore: $finalScore');
                 debugPrint('   → Saving partial progress to backend...');
                 // Save partial progress to backend
@@ -216,7 +241,7 @@ class _SessionGamePageState extends State<SessionGamePage> {
                     CircularProgressIndicator(),
                     SizedBox(height: 16),
                     Text(
-                      'Loading TribeBlast...',
+                      'Loading tribeblast...',
                       style: TextStyle(color: Colors.white),
                     ),
                   ],

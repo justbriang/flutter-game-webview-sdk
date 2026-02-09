@@ -12,9 +12,24 @@ import 'models/session_config.dart';
 
 /// Callback when game requests session validation.
 ///
-/// Return `true` to confirm the session, `false` to reject it.
-/// If you need async validation, use [GameController.confirmSession] instead.
-typedef SessionStartCallback = Future<bool> Function(
+/// Return `true` to auto-confirm the session using [SessionConfig] values.
+/// Return `false` to reject the session.
+/// Return `null` to handle confirmation manually via [GameController.confirmSession].
+///
+/// Use `null` when you need to fetch data (like high scores) from your backend
+/// before confirming:
+/// ```dart
+/// onSessionStart: (sessionId, authToken) async {
+///   final result = await myApi.validateSession(sessionId, authToken);
+///   controller.confirmSession(
+///     sessionId: sessionId,
+///     highScore: result.highScore,
+///     playerName: result.playerName,
+///   );
+///   return null; // handled manually
+/// },
+/// ```
+typedef SessionStartCallback = Future<bool?> Function(
   String sessionId,
   String authToken,
 );
@@ -270,12 +285,13 @@ class _GameWebViewState extends State<GameWebView> {
 
     // If callback provided, let developer handle validation
     if (widget.onSessionStart != null) {
-      final confirmed = await widget.onSessionStart!(sessionId, authToken);
-      if (confirmed) {
+      final result = await widget.onSessionStart!(sessionId, authToken);
+      if (result == true) {
         await _confirmSession(sessionId);
-      } else {
+      } else if (result == false) {
         await _rejectSession(sessionId, 'Session rejected by app');
       }
+      // result == null: developer handles confirmation manually via controller
       return;
     }
 
